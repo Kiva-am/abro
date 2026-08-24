@@ -1,4 +1,16 @@
+import { env } from "cloudflare:workers";
+
 const ETHIOPIAN_MOBILE = /^\+251[79]\d{8}$/;
+
+type SmsEnvironment = {
+  AFROMESSAGE_API_TOKEN?: string;
+  AFROMESSAGE_SENDER?: string;
+  AFROMESSAGE_IDENTIFIER_ID?: string;
+};
+
+function smsEnvironment() {
+  return env as SmsEnvironment;
+}
 
 export function normalizeEthiopianPhone(value: unknown) {
   if (typeof value !== "string") return null;
@@ -9,12 +21,13 @@ export function normalizeEthiopianPhone(value: unknown) {
 }
 
 export function afroMessageToken() {
-  return process.env.AFROMESSAGE_API_TOKEN?.trim() || "";
+  return smsEnvironment().AFROMESSAGE_API_TOKEN?.trim() || "";
 }
 
 export function afroMessageQuery(phone: string) {
-  const query = new URLSearchParams({ to: phone, sender: process.env.AFROMESSAGE_SENDER?.trim() || "Debal" });
-  const identifier = process.env.AFROMESSAGE_IDENTIFIER_ID?.trim();
+  const runtime = smsEnvironment();
+  const query = new URLSearchParams({ to: phone, sender: runtime.AFROMESSAGE_SENDER?.trim() || "Debal" });
+  const identifier = runtime.AFROMESSAGE_IDENTIFIER_ID?.trim();
   if (identifier) query.set("from", identifier);
   return query;
 }
