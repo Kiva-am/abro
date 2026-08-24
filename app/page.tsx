@@ -16,7 +16,7 @@ export default function Home() {
     <main>
       <header className="site-header shell">
         <a className="brand" href="#top" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></a>
-        <nav aria-label="Main navigation"><a href="/listings">Find a home</a><a href="#roommates">Find a roommate</a><a href="#safety">How it works</a></nav>
+        <nav aria-label="Main navigation"><a href="/listings">Find a home</a><a href="/roommates">Find a roommate</a><a href="#safety">How it works</a></nav>
         <div className="header-actions"><a className="button button-ghost" href="/onboarding">My profile</a><a className="button button-dark" href="/listings/new">List a place</a></div>
       </header>
 
@@ -50,7 +50,7 @@ export default function Home() {
 
       <section className="match-section" id="roommates">
         <div className="shell match-layout">
-          <div className="match-copy"><span className="eyebrow light">MORE THAN A ROOM</span><h2>Meet someone you&apos;ll actually enjoy living with.</h2><p>Debal compares the things that make a shared home work—from quiet hours and cleanliness to budget and move-in date.</p><a className="button button-light" href="#top">Find my matches <span>→</span></a></div>
+          <div className="match-copy"><span className="eyebrow light">MORE THAN A ROOM</span><h2>Meet someone you&apos;ll actually enjoy living with.</h2><p>Debal compares the things that make a shared home work—from quiet hours and cleanliness to budget and move-in date.</p><a className="button button-light" href="/roommates">Find my matches <span>→</span></a></div>
           <div className="match-card"><div className="profile-row"><div className="avatar avatar-one">H</div><div className="compatibility"><strong>92%</strong><span>compatible</span></div><div className="avatar avatar-two">M</div></div><div className="match-reasons"><span>✓ Same neighborhood</span><span>✓ Similar budget</span><span>✓ Both non-smokers</span><span>✓ Similar sleep schedule</span></div></div>
         </div>
       </section>
