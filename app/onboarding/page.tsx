@@ -31,14 +31,14 @@ export default function OnboardingPage() {
   }
 
   if (status === "saved") return (
-    <main className="onboarding-page"><header className="onboarding-header shell"><Link className="brand" href="/"><span className="brand-mark">A</span><span>abro</span></Link></header><section className="saved-card"><span className="saved-check">✓</span><span className="eyebrow">PROFILE SAVED</span><h1>You&apos;re ready to start exploring.</h1><p>Your profile and housing preferences are now safely stored. Next, we&apos;ll use them to personalize listings and roommate matches.</p><Link className="button button-dark" href="/">Go to Abro <span>→</span></Link></section></main>
+    <main className="onboarding-page"><header className="onboarding-header shell"><Link className="brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link></header><section className="saved-card"><span className="saved-check">✓</span><span className="eyebrow">PROFILE SAVED</span><h1>You&apos;re ready to start exploring.</h1><p>Your profile and housing preferences are now safely stored. Next, we&apos;ll use them to personalize listings and roommate matches.</p><Link className="button button-dark" href="/">Go to Debal <span>→</span></Link></section></main>
   );
 
   return (
     <main className="onboarding-page">
-      <header className="onboarding-header shell"><Link className="brand" href="/"><span className="brand-mark">A</span><span>abro</span></Link><span>Your profile is private until you publish it.</span></header>
+      <header className="onboarding-header shell"><Link className="brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link><span>Your profile is private until you publish it.</span></header>
       <div className="onboarding-layout shell">
-        <aside className="onboarding-aside"><span className="eyebrow">SET UP YOUR PROFILE</span><h1>Help Abro find the right fit.</h1><p>Your answers improve housing results and roommate compatibility. You can change them later.</p><ol><li className={step === 1 ? "active" : "done"}><span>{step === 1 ? "1" : "✓"}</span><div><strong>About you</strong><small>Basic profile and location</small></div></li><li className={step === 2 ? "active" : ""}><span>2</span><div><strong>Your preferences</strong><small>Budget, room and lifestyle</small></div></li></ol></aside>
+        <aside className="onboarding-aside"><span className="eyebrow">SET UP YOUR PROFILE</span><h1>Help Debal find the right fit.</h1><p>Your answers improve housing results and roommate compatibility. You can change them later.</p><ol><li className={step === 1 ? "active" : "done"}><span>{step === 1 ? "1" : "✓"}</span><div><strong>About you</strong><small>Basic profile and location</small></div></li><li className={step === 2 ? "active" : ""}><span>2</span><div><strong>Your preferences</strong><small>Budget, room and lifestyle</small></div></li></ol></aside>
         <section className="onboarding-card">
           {step === 1 ? (
             <form onSubmit={(event) => { event.preventDefault(); setStep(2); }}>

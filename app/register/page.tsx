@@ -9,10 +9,10 @@ export default function RegisterPage() {
 
   return (
     <main className="auth-page">
-      <Link className="brand auth-brand" href="/"><span className="brand-mark">A</span><span>abro</span></Link>
+      <Link className="brand auth-brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link>
       <section className="auth-shell">
         <div className="auth-story">
-          <span className="eyebrow light">WELCOME TO ABRO</span>
+          <span className="eyebrow light">WELCOME TO DEBAL</span>
           <h1>A safer start to your next home.</h1>
           <p>Create one trusted profile to find rooms, list a place, and meet compatible roommates across Ethiopia.</p>
           <div className="auth-points"><span>✓ Ethiopian locations and budgets</span><span>✓ Verification without exposing private ID data</span><span>✓ Compatibility before conversation</span></div>
@@ -24,7 +24,7 @@ export default function RegisterPage() {
               <h2>Create your account</h2><p>We&apos;ll use your Ethiopian phone number to protect your account.</p>
               <label className="field-label" htmlFor="phone">Phone number</label>
               <div className="phone-field"><span>+251</span><input id="phone" inputMode="tel" placeholder="9XX XXX XXX" value={phone} onChange={(event) => setPhone(event.target.value)} required /></div>
-              <label className="consent-row"><input type="checkbox" required /><span>I agree to Abro&apos;s safety rules and terms of use.</span></label>
+              <label className="consent-row"><input type="checkbox" required /><span>I agree to Debal&apos;s safety rules and terms of use.</span></label>
               <button className="button primary-wide" type="submit">Send verification code <span>→</span></button>
               <p className="auth-footnote">Already have an account? <button type="button">Sign in</button></p>
             </form>
