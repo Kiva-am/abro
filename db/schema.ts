@@ -76,3 +76,15 @@ export const favorites = sqliteTable("favorites", {
   listingId: integer("listing_id").notNull().references(() => listings.id, { onDelete: "cascade" }),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [uniqueIndex("idx_favorites_user_listing").on(table.userId, table.listingId)]);
+
+export const messages = sqliteTable("messages", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  senderId: text("sender_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  receiverId: text("receiver_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  body: text("body").notNull(),
+  readAt: text("read_at"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_messages_sender_receiver_created").on(table.senderId, table.receiverId, table.createdAt),
+  index("idx_messages_receiver_read").on(table.receiverId, table.readAt),
+]);
