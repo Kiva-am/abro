@@ -17,7 +17,7 @@ export default function Home() {
       <header className="site-header shell">
         <a className="brand" href="#top" aria-label="Abro home"><span className="brand-mark">A</span><span>abro</span></a>
         <nav aria-label="Main navigation"><a href="#homes">Find a home</a><a href="#roommates">Find a roommate</a><a href="#safety">How it works</a></nav>
-        <div className="header-actions"><button className="button button-ghost">Sign in</button><button className="button button-dark">List a place</button></div>
+        <div className="header-actions"><a className="button button-ghost" href="/register">Sign in</a><a className="button button-dark" href="/register">List a place</a></div>
       </header>
 
       <section className="hero shell" id="top">
