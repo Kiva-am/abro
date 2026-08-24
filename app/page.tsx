@@ -16,8 +16,8 @@ export default function Home() {
     <main>
       <header className="site-header shell">
         <a className="brand" href="#top" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></a>
-        <nav aria-label="Main navigation"><a href="#homes">Find a home</a><a href="#roommates">Find a roommate</a><a href="#safety">How it works</a></nav>
-        <div className="header-actions"><a className="button button-ghost" href="/register">Sign in</a><a className="button button-dark" href="/register">List a place</a></div>
+        <nav aria-label="Main navigation"><a href="/listings">Find a home</a><a href="#roommates">Find a roommate</a><a href="#safety">How it works</a></nav>
+        <div className="header-actions"><a className="button button-ghost" href="/onboarding">My profile</a><a className="button button-dark" href="/listings/new">List a place</a></div>
       </header>
 
       <section className="hero shell" id="top">
@@ -32,12 +32,12 @@ export default function Home() {
           <label><span>Where</span><select defaultValue="Addis Ababa"><option>Addis Ababa</option><option>Adama</option><option>Hawassa</option><option>Bahir Dar</option><option>Dire Dawa</option></select></label>
           <label><span>I&apos;m looking for</span><select defaultValue="A private room"><option>A private room</option><option>A shared room</option><option>An apartment</option><option>A roommate</option></select></label>
           <label><span>Monthly budget</span><select defaultValue="3,000–10,000 ETB"><option>3,000–10,000 ETB</option><option>Under 5,000 ETB</option><option>5,000–8,000 ETB</option><option>8,000–12,000 ETB</option></select></label>
-          <button className="search-button" type="submit">Search places <span>→</span></button>
+          <a className="search-button" href="/listings">Search places <span>→</span></a>
         </form>
       </section>
 
       <section className="listing-section shell" id="homes">
-        <div className="section-heading"><div><span className="eyebrow">PLACES YOU MAY LIKE</span><h2>Homes that fit your life</h2></div><a href="#homes" className="text-link">Explore all listings <span>→</span></a></div>
+        <div className="section-heading"><div><span className="eyebrow">PLACES YOU MAY LIKE</span><h2>Homes that fit your life</h2></div><a href="/listings" className="text-link">Explore all listings <span>→</span></a></div>
         <div className="listing-grid">
           {listings.map((listing, index) => (
             <article className="listing-card" key={listing.title}>
