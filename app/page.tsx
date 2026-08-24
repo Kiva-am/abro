@@ -26,7 +26,7 @@ export default function Home() {
           <h1>Find a place.<br />Find your people.</h1>
           <p>Discover verified rooms and compatible roommates—matched to your budget, location, and way of living.</p>
         </div>
-        <video className="hero-motion" autoPlay muted loop playsInline poster="/Debal-logo.jpg" aria-label="Debal animated logo"><source src="/debal-logo%20video.mp4" type="video/mp4" /></video>
+        <video className="hero-motion" autoPlay muted loop playsInline poster="/Debal-logo.png" aria-label="Debal animated logo"><source src="/debal-logo%20video.mp4" type="video/mp4" /></video>
         <div className="trust-card" aria-label="Debal trust promise"><div className="trust-orbit"><span>✓</span></div><strong>Built for safer sharing</strong><p>Phone verification, clear listings, and compatibility-first matches.</p></div>
         <form className="search-panel" action="#homes">
           <label><span>Where</span><select defaultValue="Addis Ababa"><option>Addis Ababa</option><option>Adama</option><option>Hawassa</option><option>Bahir Dar</option><option>Dire Dawa</option></select></label>

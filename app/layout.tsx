@@ -8,7 +8,7 @@ const newsreader = Newsreader({ variable: "--font-serif", subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Debal | Verified Ethiopian Housing & Roommates",
   description: "Find verified rooms, homes, and compatible roommates across Ethiopia.",
-  icons: { icon: "/Debal-logo.jpg", shortcut: "/Debal-logo.jpg" },
+  icons: { icon: "/Debal-logo.png", shortcut: "/Debal-logo.png" },
   openGraph: {
     title: "Debal | Find a place. Find your people.",
     description: "Verified rooms, homes, and compatible roommates across Ethiopia.",
