@@ -52,13 +52,13 @@ export default function DashboardPage() {
   return <main className="dashboard-page">
     <header className="site-header shell market-header">
       <Link className="brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link>
-      <nav><Link href="/listings">Browse homes</Link><Link href="/roommates">Roommates</Link><Link href="/viewings">Viewings</Link><Link href="/verification">Verification</Link><Link href="/messages">Messages</Link></nav>
+      <nav><Link href="/listings">Browse homes</Link><Link href="/roommates">Roommates</Link><Link href="/viewings">Viewings</Link><Link href="/applications">Applications</Link><Link href="/verification">Verification</Link><Link href="/messages">Messages</Link></nav>
       <Link className="button button-dark" href="/listings/new">Add a property</Link>
     </header>
     <section className="dashboard-shell shell">
       <div className="dashboard-heading">
         <div><span className="eyebrow">OWNER DASHBOARD</span><h1>Your properties, in one place.</h1><p>Keep availability accurate so renters only contact you about homes that are ready.</p></div>
-        <Link className="button button-dark" href="/listings/new">Post another place <span>→</span></Link>
+        <div className="dashboard-heading-actions"><Link className="button button-ghost" href="/applications">Review applicants</Link><Link className="button button-dark" href="/listings/new">Post another place <span>→</span></Link></div>
       </div>
       <div className="dashboard-stats" aria-label="Listing summary">
         <div><strong>{totals.all}</strong><span>Total properties</span></div><div><strong>{totals.active}</strong><span>Available</span></div><div><strong>{totals.paused}</strong><span>Paused</span></div><div><strong>{totals.rented}</strong><span>Rented</span></div>

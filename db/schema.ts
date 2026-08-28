@@ -151,3 +151,20 @@ export const verificationRequests = sqliteTable("verification_requests", {
   index("idx_verification_user_created").on(table.userId, table.createdAt),
   index("idx_verification_listing").on(table.listingId),
 ]);
+
+export const rentalApplications = sqliteTable("rental_applications", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  listingId: integer("listing_id").notNull().references(() => listings.id, { onDelete: "cascade" }),
+  renterId: text("renter_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  message: text("message").notNull(),
+  moveInDate: text("move_in_date").notNull(),
+  occupants: integer("occupants").notNull().default(1),
+  status: text("status", { enum: ["pending", "shortlisted", "accepted", "declined", "withdrawn"] }).notNull().default("pending"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  uniqueIndex("idx_rental_applications_listing_renter").on(table.listingId, table.renterId),
+  index("idx_rental_applications_owner_status_created").on(table.ownerId, table.status, table.createdAt),
+  index("idx_rental_applications_renter_status_created").on(table.renterId, table.status, table.createdAt),
+]);
