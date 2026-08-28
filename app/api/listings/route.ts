@@ -28,6 +28,7 @@ export async function GET(request: Request) {
     l.deposit, l.room_type AS roomType, l.bedrooms, l.bathrooms, l.furnished,
     l.utilities_included AS utilitiesIncluded, l.available_from AS availableFrom,
     l.verification_status AS verificationStatus, city.name AS city,
+    (SELECT storage_key FROM listing_photos WHERE listing_id = l.id ORDER BY sort_order, id LIMIT 1) AS photoKey,
     neighborhood.name AS neighborhood
     FROM listings l
     JOIN locations city ON city.id = l.city_id

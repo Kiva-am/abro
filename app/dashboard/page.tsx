@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 type Listing = {
   id: number; title: string; description: string; monthlyRent: number; roomType: string;
   status: "draft" | "active" | "paused" | "rented" | "removed";
-  verificationStatus: string; availableFrom: string; city: string; neighborhood: string | null;
+  verificationStatus: string; availableFrom: string; city: string; neighborhood: string | null; photoKey: string | null;
 };
 
 const roomLabels: Record<string, string> = { private_room: "Private room", shared_room: "Shared room", apartment: "Apartment", house: "House" };
@@ -70,11 +70,12 @@ export default function DashboardPage() {
         <strong>You have not posted a property yet.</strong><p>Add a room, apartment, or house and start meeting potential renters.</p><Link className="button button-dark" href="/listings/new">Create your first listing</Link>
       </div> : <div className="owner-listings">
         {items.map((item) => <article className={`owner-listing status-${item.status}`} key={item.id}>
-          <div className="owner-listing-main"><div className="owner-listing-photo"><span>{roomLabels[item.roomType] || item.roomType}</span><b>#{item.id}</b></div><div>
+          <div className="owner-listing-main"><div className="owner-listing-photo">{item.photoKey && <img src={`/api/media/${item.photoKey}`} alt={item.title} />}<span>{roomLabels[item.roomType] || item.roomType}</span><b>#{item.id}</b></div><div>
             <div className="owner-listing-labels"><span className={`status-pill ${item.status}`}>{item.status}</span><span>{item.verificationStatus === "verified" ? "✓ Verified" : "Verification pending"}</span></div>
             <h2>{item.title}</h2><p>{item.neighborhood ? `${item.neighborhood}, ` : ""}{item.city} · Available {item.availableFrom}</p><strong>{Number(item.monthlyRent).toLocaleString()} ETB <small>/month</small></strong>
           </div></div>
           <div className="owner-listing-actions">
+            {item.status !== "removed" && <Link className="button button-ghost" href={`/listings/${item.id}/edit`}>Edit details & photos</Link>}
             {item.status === "active" && <><Link className="button button-ghost" href={`/listings/${item.id}`}>View listing</Link><button disabled={updating === item.id} onClick={() => void changeStatus(item.id, "paused")}>Pause</button><button disabled={updating === item.id} onClick={() => void changeStatus(item.id, "rented")}>Mark rented</button></>}
             {(item.status === "paused" || item.status === "rented") && <button className="primary-status" disabled={updating === item.id} onClick={() => void changeStatus(item.id, "active")}>Make available</button>}
             {item.status !== "removed" && <button className="remove-status" disabled={updating === item.id} onClick={() => void changeStatus(item.id, "removed")}>Remove</button>}

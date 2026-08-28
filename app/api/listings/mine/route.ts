@@ -10,7 +10,8 @@ export async function GET() {
     const result = await env.DB.prepare(`SELECT l.id, l.title, l.description,
       l.monthly_rent AS monthlyRent, l.room_type AS roomType, l.status,
       l.verification_status AS verificationStatus, l.available_from AS availableFrom,
-      l.created_at AS createdAt, city.name AS city, neighborhood.name AS neighborhood
+      l.created_at AS createdAt, city.name AS city, neighborhood.name AS neighborhood,
+      (SELECT storage_key FROM listing_photos WHERE listing_id = l.id ORDER BY sort_order, id LIMIT 1) AS photoKey
       FROM listings l
       JOIN locations city ON city.id = l.city_id
       LEFT JOIN locations neighborhood ON neighborhood.id = l.neighborhood_id
