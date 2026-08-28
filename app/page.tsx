@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import HomeSearch from "@/app/components/home-search";
 
 export const metadata: Metadata = {
   title: "Debal | Find a room. Find your people.",
@@ -28,12 +29,7 @@ export default function Home() {
         </div>
         <video className="hero-motion" autoPlay muted loop playsInline poster="/Debal-logo.png" aria-label="Debal animated logo"><source src="/debal-logo%20video.mp4" type="video/mp4" /></video>
         <div className="trust-card" aria-label="Debal trust promise"><div className="trust-orbit"><span>✓</span></div><strong>Built for safer sharing</strong><p>Phone verification, clear listings, and compatibility-first matches.</p></div>
-        <form className="search-panel" action="#homes">
-          <label><span>Where</span><select defaultValue="Addis Ababa"><option>Addis Ababa</option><option>Adama</option><option>Hawassa</option><option>Bahir Dar</option><option>Dire Dawa</option></select></label>
-          <label><span>I&apos;m looking for</span><select defaultValue="A private room"><option>A private room</option><option>A shared room</option><option>An apartment</option><option>A roommate</option></select></label>
-          <label><span>Monthly budget</span><select defaultValue="3,000–10,000 ETB"><option>3,000–10,000 ETB</option><option>Under 5,000 ETB</option><option>5,000–8,000 ETB</option><option>8,000–12,000 ETB</option></select></label>
-          <a className="search-button" href="/listings">Search places <span>→</span></a>
-        </form>
+        <HomeSearch />
       </section>
 
       <section className="listing-section shell" id="homes">

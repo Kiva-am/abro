@@ -15,14 +15,32 @@ const clean = (value: unknown, max: number) => typeof value === "string" ? value
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
+  const keyword = clean(url.searchParams.get("q"), 80);
   const city = clean(url.searchParams.get("city"), 100);
+  const neighborhood = clean(url.searchParams.get("neighborhood"), 120);
   const roomType = clean(url.searchParams.get("roomType"), 40);
+  const minRent = Math.max(0, Number(url.searchParams.get("minRent")) || 0);
   const maxRent = Math.max(0, Number(url.searchParams.get("maxRent")) || 0);
+  const bedrooms = Math.max(0, Number(url.searchParams.get("bedrooms")) || 0);
+  const furnished = url.searchParams.get("furnished") === "1";
+  const utilities = url.searchParams.get("utilities") === "1";
+  const verified = url.searchParams.get("verified") === "1";
+  const availableBy = clean(url.searchParams.get("availableBy"), 20);
+  const sort = clean(url.searchParams.get("sort"), 30);
   const clauses = ["l.status = 'active'"];
   const values: Array<string | number> = [];
+  if (keyword) { clauses.push("(l.title LIKE ? OR l.description LIKE ? OR city.name LIKE ? OR neighborhood.name LIKE ?)"); const pattern = `%${keyword}%`; values.push(pattern, pattern, pattern, pattern); }
   if (city) { clauses.push("city.slug = ?"); values.push(city); }
-  if (roomType) { clauses.push("l.room_type = ?"); values.push(roomType); }
+  if (neighborhood) { clauses.push("neighborhood.slug = ?"); values.push(neighborhood); }
+  if (["private_room", "shared_room", "apartment", "house"].includes(roomType)) { clauses.push("l.room_type = ?"); values.push(roomType); }
+  if (minRent) { clauses.push("l.monthly_rent >= ?"); values.push(minRent); }
   if (maxRent) { clauses.push("l.monthly_rent <= ?"); values.push(maxRent); }
+  if (bedrooms) { clauses.push("l.bedrooms >= ?"); values.push(bedrooms); }
+  if (furnished) clauses.push("l.furnished = 1");
+  if (utilities) clauses.push("l.utilities_included = 1");
+  if (verified) clauses.push("l.verification_status = 'verified'");
+  if (/^\d{4}-\d{2}-\d{2}$/.test(availableBy)) { clauses.push("l.available_from <= ?"); values.push(availableBy); }
+  const orderBy: Record<string, string> = { price_low: "l.monthly_rent ASC, l.created_at DESC", price_high: "l.monthly_rent DESC, l.created_at DESC", available: "l.available_from ASC, l.created_at DESC", newest: "l.created_at DESC" };
 
   const query = env.DB.prepare(`SELECT l.id, l.title, l.description, l.monthly_rent AS monthlyRent,
     l.deposit, l.room_type AS roomType, l.bedrooms, l.bathrooms, l.furnished,
@@ -34,7 +52,7 @@ export async function GET(request: Request) {
     JOIN locations city ON city.id = l.city_id
     LEFT JOIN locations neighborhood ON neighborhood.id = l.neighborhood_id
     WHERE ${clauses.join(" AND ")}
-    ORDER BY l.created_at DESC LIMIT 60`).bind(...values);
+    ORDER BY ${orderBy[sort] ?? orderBy.newest} LIMIT 60`).bind(...values);
   const result = await query.all();
   return Response.json({ listings: result.results });
 }
