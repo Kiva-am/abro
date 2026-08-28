@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 import { getChatGPTUser } from "@/app/chatgpt-auth";
+import { notificationStatement } from "@/lib/notifications";
 
 export async function GET() {
   const identity = await getChatGPTUser();
@@ -18,6 +19,7 @@ export async function GET() {
       LEFT JOIN profiles owner_profile ON owner_profile.user_id=vr.owner_id
       WHERE vr.owner_id=? OR vr.renter_id=? ORDER BY vr.requested_at DESC,vr.id DESC LIMIT 100`)
       .bind(identity.userId, identity.userId, identity.userId, identity.userId, identity.userId).all();
+    await env.DB.prepare("UPDATE notifications SET read_at=CURRENT_TIMESTAMP WHERE user_id=? AND type='viewing' AND read_at IS NULL").bind(identity.userId).run();
     return Response.json({ viewings: result.results });
   } catch {
     return Response.json({ error: "Unable to load viewing requests." }, { status: 500 });
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
     if (!Number.isInteger(listingId) || listingId < 1 || !Number.isFinite(requestedDate.getTime()) || requestedDate.getTime() < Date.now() + 30 * 60 * 1000 || requestedDate.getTime() > latestAllowed) {
       return Response.json({ error: "Choose a viewing time between 30 minutes and 180 days from now." }, { status: 400 });
     }
-    const listing = await env.DB.prepare("SELECT id,owner_id AS ownerId FROM listings WHERE id=? AND status='active'").bind(listingId).first<{ id: number; ownerId: string }>();
+    const listing = await env.DB.prepare("SELECT id,owner_id AS ownerId,title FROM listings WHERE id=? AND status='active'").bind(listingId).first<{ id: number; ownerId: string; title: string }>();
     if (!listing) return Response.json({ error: "This property is no longer available." }, { status: 404 });
     if (listing.ownerId === identity.userId) return Response.json({ error: "You cannot request a viewing of your own property." }, { status: 400 });
     await env.DB.prepare("INSERT INTO users (id,email) VALUES (?,?) ON CONFLICT(id) DO UPDATE SET email=excluded.email")
@@ -44,8 +46,11 @@ export async function POST(request: Request) {
       .bind(listingId, identity.userId).first();
     if (existing) return Response.json({ error: "You already have a pending request for this property." }, { status: 409 });
     const note = typeof payload.note === "string" ? payload.note.trim().slice(0, 500) : "";
-    await env.DB.prepare("INSERT INTO viewing_requests (listing_id,renter_id,owner_id,requested_at,note) VALUES (?,?,?,?,?)")
-      .bind(listingId, identity.userId, listing.ownerId, requestedDate.toISOString(), note).run();
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO viewing_requests (listing_id,renter_id,owner_id,requested_at,note) VALUES (?,?,?,?,?)")
+        .bind(listingId, identity.userId, listing.ownerId, requestedDate.toISOString(), note),
+      notificationStatement(listing.ownerId, "viewing", "New viewing request", `A renter requested a viewing for ${listing.title}.`, "/viewings"),
+    ]);
     return Response.json({ created: true });
   } catch {
     return Response.json({ error: "Unable to request this viewing." }, { status: 500 });

@@ -168,3 +168,17 @@ export const rentalApplications = sqliteTable("rental_applications", {
   index("idx_rental_applications_owner_status_created").on(table.ownerId, table.status, table.createdAt),
   index("idx_rental_applications_renter_status_created").on(table.renterId, table.status, table.createdAt),
 ]);
+
+export const notifications = sqliteTable("notifications", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: text("type", { enum: ["message", "viewing", "application", "verification"] }).notNull(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  href: text("href").notNull(),
+  readAt: text("read_at"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_notifications_user_read_created").on(table.userId, table.readAt, table.createdAt),
+  index("idx_notifications_user_created").on(table.userId, table.createdAt),
+]);

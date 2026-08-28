@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HomeSearch from "@/app/components/home-search";
+import NotificationLink from "@/app/components/notification-link";
 
 export const metadata: Metadata = {
   title: "Debal | Find a room. Find your people.",
@@ -18,7 +19,7 @@ export default function Home() {
       <header className="site-header shell">
         <a className="brand" href="#top" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></a>
         <nav aria-label="Main navigation"><a href="/listings">Find a home</a><a href="/roommates">Find a roommate</a><a href="#safety">How it works</a></nav>
-        <div className="header-actions"><a className="button button-ghost" href="/onboarding">My profile</a><a className="button button-dark" href="/listings/new">List a place</a></div>
+        <div className="header-actions"><NotificationLink /><a className="button button-ghost" href="/onboarding">My profile</a><a className="button button-dark" href="/listings/new">List a place</a></div>
       </header>
 
       <section className="hero shell" id="top">

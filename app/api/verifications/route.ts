@@ -30,6 +30,7 @@ export async function GET() {
       env.DB.prepare(`SELECT id,title,verification_status AS verificationStatus FROM listings
         WHERE owner_id=? AND status!='removed' ORDER BY created_at DESC,id DESC`).bind(identity.userId).all(),
     ]);
+    await env.DB.prepare("UPDATE notifications SET read_at=CURRENT_TIMESTAMP WHERE user_id=? AND type='verification' AND read_at IS NULL").bind(identity.userId).run();
     return Response.json({
       identityVerifiedAt: user?.identityVerifiedAt ?? null,
       requests: requests.results,

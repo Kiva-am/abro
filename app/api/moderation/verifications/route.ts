@@ -52,6 +52,10 @@ export async function PATCH(request: Request) {
       updates.push(env.DB.prepare(`UPDATE listings SET verification_status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND owner_id=?`)
         .bind(status === "approved" ? "verified" : "unverified", item.listingId, item.userId));
     }
+    updates.push(env.DB.prepare(`INSERT INTO notifications (user_id,type,title,body,href)
+      SELECT ?,'verification',?,?,'/verification' WHERE EXISTS
+      (SELECT 1 FROM verification_requests WHERE id=? AND status=?)`)
+      .bind(item.userId, `${item.type === "identity" ? "Identity" : "Property"} verification ${status}`, status === "approved" ? `Your ${item.type} verification was approved.` : `Your ${item.type} verification needs a new document. ${note}`, id, status));
     await env.DB.batch(updates);
     return Response.json({ updated: true });
   } catch {

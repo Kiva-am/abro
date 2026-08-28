@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import NotificationLink from "@/app/components/notification-link";
 
 type Verification = {
   id: number;
@@ -71,7 +72,7 @@ export default function VerificationPage() {
     <header className="site-header shell market-header">
       <Link className="brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link>
       <nav><Link href="/listings">Browse homes</Link><Link href="/roommates">Roommates</Link><Link href="/dashboard">My properties</Link><Link href="/messages">Messages</Link></nav>
-      <Link className="button button-dark" href="/dashboard">Dashboard</Link>
+      <div className="header-actions"><NotificationLink /><Link className="button button-dark" href="/dashboard">Dashboard</Link></div>
     </header>
     <section className="verification-shell shell">
       <div className="verification-heading"><div><span className="eyebrow">TRUST YOUR NEXT MOVE</span><h1>Verify your identity and properties.</h1><p>Verification gives renters, owners, and future roommates a clearer trust signal before they connect.</p></div><div className="privacy-seal"><strong>Private by design</strong><span>Your documents are only visible to you and authorized Debal moderators.</span></div></div>

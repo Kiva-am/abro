@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import NotificationLink from "@/app/components/notification-link";
 
 type Listing = {
   id: number; title: string; description: string; monthlyRent: number; roomType: string;
@@ -53,7 +54,7 @@ export default function DashboardPage() {
     <header className="site-header shell market-header">
       <Link className="brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link>
       <nav><Link href="/listings">Browse homes</Link><Link href="/roommates">Roommates</Link><Link href="/viewings">Viewings</Link><Link href="/applications">Applications</Link><Link href="/verification">Verification</Link><Link href="/messages">Messages</Link></nav>
-      <Link className="button button-dark" href="/listings/new">Add a property</Link>
+      <div className="header-actions"><NotificationLink /><Link className="button button-dark" href="/listings/new">Add a property</Link></div>
     </header>
     <section className="dashboard-shell shell">
       <div className="dashboard-heading">
