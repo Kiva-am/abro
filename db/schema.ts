@@ -88,3 +88,19 @@ export const messages = sqliteTable("messages", {
   index("idx_messages_sender_receiver_created").on(table.senderId, table.receiverId, table.createdAt),
   index("idx_messages_receiver_read").on(table.receiverId, table.readAt),
 ]);
+
+export const viewingRequests = sqliteTable("viewing_requests", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  listingId: integer("listing_id").notNull().references(() => listings.id, { onDelete: "cascade" }),
+  renterId: text("renter_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  requestedAt: text("requested_at").notNull(),
+  note: text("note").notNull().default(""),
+  status: text("status", { enum: ["pending", "accepted", "declined", "cancelled"] }).notNull().default("pending"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_viewing_requests_owner_status_date").on(table.ownerId, table.status, table.requestedAt),
+  index("idx_viewing_requests_renter_status_date").on(table.renterId, table.status, table.requestedAt),
+  index("idx_viewing_requests_listing").on(table.listingId),
+]);

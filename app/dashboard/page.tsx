@@ -54,7 +54,7 @@ export default function DashboardPage() {
   return <main className="dashboard-page">
     <header className="site-header shell market-header">
       <Link className="brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link>
-      <nav><Link href="/listings">Browse homes</Link><Link href="/roommates">Roommates</Link><Link href="/messages">Messages</Link></nav>
+      <nav><Link href="/listings">Browse homes</Link><Link href="/roommates">Roommates</Link><Link href="/viewings">Viewings</Link><Link href="/messages">Messages</Link></nav>
       <Link className="button button-dark" href="/listings/new">Add a property</Link>
     </header>
     <section className="dashboard-shell shell">
