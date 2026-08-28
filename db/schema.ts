@@ -104,3 +104,32 @@ export const viewingRequests = sqliteTable("viewing_requests", {
   index("idx_viewing_requests_renter_status_date").on(table.renterId, table.status, table.requestedAt),
   index("idx_viewing_requests_listing").on(table.listingId),
 ]);
+
+export const blockedUsers = sqliteTable("blocked_users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  blockerId: text("blocker_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  blockedUserId: text("blocked_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  uniqueIndex("idx_blocked_users_pair").on(table.blockerId, table.blockedUserId),
+  index("idx_blocked_users_blocked").on(table.blockedUserId),
+]);
+
+export const reports = sqliteTable("reports", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  reporterId: text("reporter_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  targetType: text("target_type", { enum: ["listing", "member"] }).notNull(),
+  listingId: integer("listing_id").references(() => listings.id, { onDelete: "set null" }),
+  reportedUserId: text("reported_user_id").references(() => users.id, { onDelete: "set null" }),
+  reason: text("reason").notNull(),
+  details: text("details").notNull().default(""),
+  status: text("status", { enum: ["open", "reviewing", "resolved", "dismissed"] }).notNull().default("open"),
+  moderatorNote: text("moderator_note").notNull().default(""),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_reports_status_created").on(table.status, table.createdAt),
+  index("idx_reports_reporter").on(table.reporterId, table.createdAt),
+  index("idx_reports_listing").on(table.listingId),
+  index("idx_reports_user").on(table.reportedUserId),
+]);
