@@ -17,20 +17,18 @@ export default function DashboardPage() {
   const [updating, setUpdating] = useState<number | null>(null);
   const [error, setError] = useState("");
 
-  async function load() {
-    setLoading(true); setError("");
-    try {
-      const response = await fetch("/api/listings/mine");
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/listings/mine").then(async (response) => {
       const text = await response.text();
       const data = text ? JSON.parse(text) as { listings?: Listing[]; error?: string } : {};
       if (!response.ok) throw new Error(data.error || "Unable to load your listings.");
-      setItems(data.listings ?? []);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to load your listings.");
-    } finally { setLoading(false); }
-  }
-
-  useEffect(() => { void load(); }, []);
+      if (active) setItems(data.listings ?? []);
+    }).catch((caught) => {
+      if (active) setError(caught instanceof Error ? caught.message : "Unable to load your listings.");
+    }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
   const totals = useMemo(() => ({
     all: items.filter((item) => item.status !== "removed").length,
     active: items.filter((item) => item.status === "active").length,
@@ -54,7 +52,7 @@ export default function DashboardPage() {
   return <main className="dashboard-page">
     <header className="site-header shell market-header">
       <Link className="brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link>
-      <nav><Link href="/listings">Browse homes</Link><Link href="/roommates">Roommates</Link><Link href="/viewings">Viewings</Link><Link href="/messages">Messages</Link></nav>
+      <nav><Link href="/listings">Browse homes</Link><Link href="/roommates">Roommates</Link><Link href="/viewings">Viewings</Link><Link href="/verification">Verification</Link><Link href="/messages">Messages</Link></nav>
       <Link className="button button-dark" href="/listings/new">Add a property</Link>
     </header>
     <section className="dashboard-shell shell">
@@ -71,7 +69,7 @@ export default function DashboardPage() {
       </div> : <div className="owner-listings">
         {items.map((item) => <article className={`owner-listing status-${item.status}`} key={item.id}>
           <div className="owner-listing-main"><div className="owner-listing-photo">{item.photoKey && <img src={`/api/media/${item.photoKey}`} alt={item.title} />}<span>{roomLabels[item.roomType] || item.roomType}</span><b>#{item.id}</b></div><div>
-            <div className="owner-listing-labels"><span className={`status-pill ${item.status}`}>{item.status}</span><span>{item.verificationStatus === "verified" ? "✓ Verified" : "Verification pending"}</span></div>
+            <div className="owner-listing-labels"><span className={`status-pill ${item.status}`}>{item.status}</span><Link href="/verification">{item.verificationStatus === "verified" ? "✓ Verified" : item.verificationStatus === "pending" ? "Verification pending" : "Verify property →"}</Link></div>
             <h2>{item.title}</h2><p>{item.neighborhood ? `${item.neighborhood}, ` : ""}{item.city} · Available {item.availableFrom}</p><strong>{Number(item.monthlyRent).toLocaleString()} ETB <small>/month</small></strong>
           </div></div>
           <div className="owner-listing-actions">

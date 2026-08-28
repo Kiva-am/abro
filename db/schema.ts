@@ -133,3 +133,21 @@ export const reports = sqliteTable("reports", {
   index("idx_reports_listing").on(table.listingId),
   index("idx_reports_user").on(table.reportedUserId),
 ]);
+
+export const verificationRequests = sqliteTable("verification_requests", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: text("type", { enum: ["identity", "property"] }).notNull(),
+  listingId: integer("listing_id").references(() => listings.id, { onDelete: "set null" }),
+  documentKey: text("document_key").notNull(),
+  documentName: text("document_name").notNull(),
+  contentType: text("content_type").notNull(),
+  status: text("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
+  moderatorNote: text("moderator_note").notNull().default(""),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index("idx_verification_status_created").on(table.status, table.createdAt),
+  index("idx_verification_user_created").on(table.userId, table.createdAt),
+  index("idx_verification_listing").on(table.listingId),
+]);
