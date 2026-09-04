@@ -11,6 +11,7 @@ export async function GET() {
       l.title AS listingTitle,l.status AS listingStatus,l.monthly_rent AS monthlyRent,
       city.name AS city,neighborhood.name AS neighborhood,
       (SELECT storage_key FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order,id LIMIT 1) AS photoKey,
+      (SELECT status FROM rental_offers WHERE application_id=a.id LIMIT 1) AS offerStatus,
       renter.first_name AS renterName,renter.occupation AS renterOccupation,renter.bio AS renterBio,
       renter_user.identity_verified_at AS renterVerifiedAt,owner.first_name AS ownerName,
       CASE WHEN a.owner_id=? THEN 'incoming' ELSE 'outgoing' END AS direction

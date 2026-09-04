@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-type Item = { id: number; title: string; monthlyRent: number; roomType: string; city: string; neighborhood: string | null; description: string };
+type Item = { id: number; title: string; monthlyRent: number; roomType: string; city: string; neighborhood: string | null; description: string; photoKey: string | null };
 
 async function readJson<T>(response: Response): Promise<T> {
   const text = await response.text();
@@ -23,13 +23,9 @@ export default function FavoritesPage() {
     async function loadFavorites() {
       setLoading(true); setError("");
       try {
-        const [favoriteResponse, listingsResponse] = await Promise.all([fetch("/api/favorites"), fetch("/api/listings")]);
-        const favoriteData = await readJson<{ listingIds?: number[] }>(favoriteResponse);
-        const listingsData = await readJson<{ listings?: Item[] }>(listingsResponse);
-        if (active) {
-          const ids = favoriteData.listingIds ?? [];
-          setItems((listingsData.listings ?? []).filter((item) => ids.includes(item.id)));
-        }
+        const response = await fetch("/api/favorites");
+        const data = await readJson<{ listings?: Item[] }>(response);
+        if (active) setItems(data.listings ?? []);
       } catch {
         if (active) setError("Saved listings could not be loaded. Please refresh and try again.");
       } finally {

@@ -41,15 +41,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (!title || !description || !citySlug || !neighborhoodSlug || !monthlyRent || !availableFrom || !roomTypes.has(roomType)) {
       return Response.json({ error: "Complete all required listing details." }, { status: 400 });
     }
-    const city = await env.DB.prepare("SELECT id FROM locations WHERE slug=?").bind(citySlug).first<{ id: number }>();
-    const neighborhood = await env.DB.prepare("SELECT id FROM locations WHERE slug=?").bind(neighborhoodSlug).first<{ id: number }>();
+    const city = await env.DB.prepare("SELECT id FROM locations WHERE slug=? AND type='city'").bind(citySlug).first<{ id: number }>();
+    const neighborhood = city
+      ? await env.DB.prepare("SELECT id FROM locations WHERE slug=? AND type='neighborhood' AND parent_id=?").bind(neighborhoodSlug, city.id).first<{ id: number }>()
+      : null;
     if (!city || !neighborhood) return Response.json({ error: "Select a supported city and neighborhood." }, { status: 400 });
     const rules = clean(payload.houseRules, 500).split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
     await env.DB.prepare(`UPDATE listings SET title=?,description=?,city_id=?,neighborhood_id=?,monthly_rent=?,deposit=?,
       room_type=?,bedrooms=?,bathrooms=?,furnished=?,utilities_included=?,available_from=?,house_rules=?,updated_at=CURRENT_TIMESTAMP
       WHERE id=? AND owner_id=?`).bind(title, description, city.id, neighborhood.id, monthlyRent, deposit, roomType,
         Math.max(1, Number(payload.bedrooms) || 1), Math.max(1, Number(payload.bathrooms) || 1),
-        Boolean(payload.furnished) ? 1 : 0, Boolean(payload.utilitiesIncluded) ? 1 : 0, availableFrom, JSON.stringify(rules), id, identity.userId).run();
+        payload.furnished ? 1 : 0, payload.utilitiesIncluded ? 1 : 0, availableFrom, JSON.stringify(rules), id, identity.userId).run();
     return Response.json({ updated: true });
   } catch {
     return Response.json({ error: "Unable to update this listing." }, { status: 500 });

@@ -13,6 +13,14 @@ export const users = sqliteTable("users", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [uniqueIndex("idx_users_email").on(table.email), uniqueIndex("idx_users_phone").on(table.phone)]);
 
+export const phoneVerificationChallenges = sqliteTable("phone_verification_challenges", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  phone: text("phone").notNull(),
+  sendCount: integer("send_count").notNull().default(0),
+  windowStartedAt: text("window_started_at").notNull().default("1970-01-01T00:00:00.000Z"),
+  lastSentAt: text("last_sent_at").notNull().default("1970-01-01T00:00:00.000Z"),
+});
+
 export const locations = sqliteTable("locations", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
@@ -172,7 +180,7 @@ export const rentalApplications = sqliteTable("rental_applications", {
 export const notifications = sqliteTable("notifications", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  type: text("type", { enum: ["message", "viewing", "application", "verification"] }).notNull(),
+  type: text("type", { enum: ["message", "viewing", "application", "verification", "offer"] }).notNull(),
   title: text("title").notNull(),
   body: text("body").notNull(),
   href: text("href").notNull(),
@@ -181,4 +189,25 @@ export const notifications = sqliteTable("notifications", {
 }, (table) => [
   index("idx_notifications_user_read_created").on(table.userId, table.readAt, table.createdAt),
   index("idx_notifications_user_created").on(table.userId, table.createdAt),
+]);
+
+export const rentalOffers = sqliteTable("rental_offers", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  applicationId: integer("application_id").notNull().references(() => rentalApplications.id, { onDelete: "cascade" }),
+  listingId: integer("listing_id").notNull().references(() => listings.id, { onDelete: "cascade" }),
+  renterId: text("renter_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  ownerId: text("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  monthlyRent: integer("monthly_rent").notNull(),
+  deposit: integer("deposit").notNull().default(0),
+  moveInDate: text("move_in_date").notNull(),
+  leaseMonths: integer("lease_months").notNull(),
+  terms: text("terms").notNull().default(""),
+  status: text("status", { enum: ["offered", "accepted", "declined", "withdrawn"] }).notNull().default("offered"),
+  renterAcceptedAt: text("renter_accepted_at"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  uniqueIndex("idx_rental_offers_application").on(table.applicationId),
+  index("idx_rental_offers_owner_status_created").on(table.ownerId, table.status, table.createdAt),
+  index("idx_rental_offers_renter_status_created").on(table.renterId, table.status, table.createdAt),
 ]);

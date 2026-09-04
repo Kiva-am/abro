@@ -22,6 +22,7 @@
 .DS_Store
 doc_review/
 .sites-package/
+.sites-package-v*/
 *.pem
 
 # debug

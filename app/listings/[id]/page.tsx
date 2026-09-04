@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+/* eslint-disable no-empty */
 import Link from "next/link";
 import { env } from "cloudflare:workers";
 import FavoriteButton from "@/app/components/favorite-button";

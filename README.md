@@ -1,15 +1,17 @@
-# Abro
+# Abro (Debal)
 
-Abro is a verified Ethiopian housing and roommate marketplace. This repository starts the MVP with a public discovery experience and the data foundation for profiles, listings, trust signals, favorites, and compatibility matching.
+Abro is the repository for **Debal**, a verified Ethiopian housing and roommate marketplace. The application runs on Cloudflare through vinext and uses ChatGPT-hosted authentication, D1 for relational data, and R2 for private and public media.
 
 ## Current product slice
 
-- Responsive public homepage
-- Ethiopian city and housing search controls
-- Listing, verification, and compatibility concepts
-- Safety-first guidance
-- D1 schema for users, profiles, preferences, locations, listings, photos, and favorites
-- R2 media binding for profile and listing images
+- Responsive discovery homepage and searchable Ethiopian property marketplace
+- Owner listing management with R2 photo uploads
+- Profiles, saved listings, and explained roommate compatibility scores
+- Private messaging, viewing requests, rental applications, and rental offers
+- In-app notifications, blocking, reporting, and moderator queues
+- Private identity and property verification documents
+- Ethiopian phone verification through AfroMessage
+- Safety-first guidance throughout renter and owner workflows
 
 ## Run locally
 
@@ -20,13 +22,31 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+The local runtime expects the `DB` D1 binding and `MEDIA` R2 binding configured in `.openai/hosting.json`. Phone verification additionally requires these runtime secrets:
+
+```text
+AFROMESSAGE_API_TOKEN
+AFROMESSAGE_SENDER
+AFROMESSAGE_IDENTIFIER_ID  # optional
+```
+
+## Quality checks
+
+```bash
+npm run lint
+npx tsc --noEmit --incremental false
+npm test
+```
+
+Database changes live in `db/schema.ts` and must be accompanied by an ordered SQL migration in `drizzle/`.
+
 ## MVP roadmap
 
-1. Foundation: seed Ethiopian locations, connect authenticated profiles, and implement phone-verification provider integration.
-2. Marketplace: listing creation, media upload, search/filter results, listing details, and favorites.
-3. Matching: lifestyle questionnaire, preference scoring, and explained compatibility results.
-4. Communication: messaging, notifications, blocking, and reporting.
-5. Trust and safety: identity/property review queues, moderation, reviews, and admin tools.
+1. Add integration tests for authenticated APIs and database state transitions.
+2. Add pagination to listings, conversations, applications, and moderation queues.
+3. Replace homepage samples with live personalized listings.
+4. Add reviews, audit logs, and administrator provisioning tools.
+5. Add observability, abuse monitoring, and production rate-limit controls.
 
 ## Safety principle
 

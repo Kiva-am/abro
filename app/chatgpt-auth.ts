@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { env } from "cloudflare:workers";
 
 export type ChatGPTUser = {
   userId: string;
@@ -23,6 +24,11 @@ export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
   const userId = requestHeaders.get(USER_ID_HEADER);
   const email = requestHeaders.get(USER_EMAIL_HEADER);
   if (!userId || !email) return null;
+
+  const account = await env.DB.prepare("SELECT status FROM users WHERE id=?")
+    .bind(userId)
+    .first<{ status: string }>();
+  if (account && account.status !== "active") return null;
 
   const encodedFullName = requestHeaders.get(USER_FULL_NAME_HEADER);
   const fullName =

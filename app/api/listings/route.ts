@@ -71,9 +71,11 @@ export async function POST(request: Request) {
       return Response.json({ error: "Complete all required listing details." }, { status: 400 });
     }
     const db = getDb();
-    const [city] = await db.select({ id: locations.id }).from(locations).where(eq(locations.slug, citySlug)).limit(1);
-    const [neighborhood] = await db.select({ id: locations.id }).from(locations).where(eq(locations.slug, neighborhoodSlug)).limit(1);
-    if (!city || !neighborhood) return Response.json({ error: "Select a supported city and neighborhood." }, { status: 400 });
+    const [city] = await db.select({ id: locations.id, type: locations.type }).from(locations).where(eq(locations.slug, citySlug)).limit(1);
+    const [neighborhood] = await db.select({ id: locations.id, type: locations.type, parentId: locations.parentId }).from(locations).where(eq(locations.slug, neighborhoodSlug)).limit(1);
+    if (!city || city.type !== "city" || !neighborhood || neighborhood.type !== "neighborhood" || neighborhood.parentId !== city.id) {
+      return Response.json({ error: "Select a neighborhood within the chosen city." }, { status: 400 });
+    }
     await db.insert(users).values({ id: identity.userId, email: identity.email }).onConflictDoUpdate({ target: users.id, set: { email: identity.email } });
     const [created] = await db.insert(listings).values({
       ownerId: identity.userId, title, description, cityId: city.id, neighborhoodId: neighborhood.id,

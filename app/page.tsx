@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import HomeSearch from "@/app/components/home-search";
 import NotificationLink from "@/app/components/notification-link";
 
@@ -18,8 +19,8 @@ export default function Home() {
     <main>
       <header className="site-header shell">
         <a className="brand" href="#top" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></a>
-        <nav aria-label="Main navigation"><a href="/listings">Find a home</a><a href="/roommates">Find a roommate</a><a href="#safety">How it works</a></nav>
-        <div className="header-actions"><NotificationLink /><a className="button button-ghost" href="/onboarding">My profile</a><a className="button button-dark" href="/listings/new">List a place</a></div>
+        <nav aria-label="Main navigation"><Link href="/listings">Find a home</Link><Link href="/roommates">Find a roommate</Link><a href="#safety">How it works</a></nav>
+        <div className="header-actions"><NotificationLink /><Link className="button button-ghost" href="/onboarding">My profile</Link><Link className="button button-dark" href="/listings/new">List a place</Link></div>
       </header>
 
       <section className="hero shell" id="top">
@@ -34,7 +35,7 @@ export default function Home() {
       </section>
 
       <section className="listing-section shell" id="homes">
-        <div className="section-heading"><div><span className="eyebrow">PLACES YOU MAY LIKE</span><h2>Homes that fit your life</h2></div><a href="/listings" className="text-link">Explore all listings <span>→</span></a></div>
+        <div className="section-heading"><div><span className="eyebrow">PLACES YOU MAY LIKE</span><h2>Homes that fit your life</h2></div><Link href="/listings" className="text-link">Explore all listings <span>→</span></Link></div>
         <div className="listing-grid">
           {listings.map((listing, index) => (
             <article className="listing-card" key={listing.title}>
@@ -47,7 +48,7 @@ export default function Home() {
 
       <section className="match-section" id="roommates">
         <div className="shell match-layout">
-          <div className="match-copy"><span className="eyebrow light">MORE THAN A ROOM</span><h2>Meet someone you&apos;ll actually enjoy living with.</h2><p>Debal compares the things that make a shared home work—from quiet hours and cleanliness to budget and move-in date.</p><a className="button button-light" href="/roommates">Find my matches <span>→</span></a></div>
+          <div className="match-copy"><span className="eyebrow light">MORE THAN A ROOM</span><h2>Meet someone you&apos;ll actually enjoy living with.</h2><p>Debal compares the things that make a shared home work—from quiet hours and cleanliness to budget and move-in date.</p><Link className="button button-light" href="/roommates">Find my matches <span>→</span></Link></div>
           <div className="match-card"><div className="profile-row"><div className="avatar avatar-one">H</div><div className="compatibility"><strong>92%</strong><span>compatible</span></div><div className="avatar avatar-two">M</div></div><div className="match-reasons"><span>✓ Same neighborhood</span><span>✓ Similar budget</span><span>✓ Both non-smokers</span><span>✓ Similar sleep schedule</span></div></div>
         </div>
       </section>

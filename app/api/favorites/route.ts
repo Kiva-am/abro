@@ -1,3 +1,4 @@
+import { env } from "cloudflare:workers";
 import { and, eq } from "drizzle-orm";
 import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { getDb } from "@/db";
@@ -7,8 +8,13 @@ export async function GET() {
   try {
     const identity = await getChatGPTUser();
     if (!identity) return Response.json({ listingIds: [] });
-    const rows = await getDb().select({ listingId: favorites.listingId }).from(favorites).where(eq(favorites.userId, identity.userId));
-    return Response.json({ listingIds: rows.map((row) => row.listingId) });
+    const rows = await env.DB.prepare(`SELECT l.id,l.title,l.description,l.monthly_rent AS monthlyRent,l.room_type AS roomType,
+      city.name AS city,neighborhood.name AS neighborhood,
+      (SELECT storage_key FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order,id LIMIT 1) AS photoKey
+      FROM favorites f JOIN listings l ON l.id=f.listing_id JOIN locations city ON city.id=l.city_id
+      LEFT JOIN locations neighborhood ON neighborhood.id=l.neighborhood_id
+      WHERE f.user_id=? AND l.status='active' ORDER BY f.created_at DESC,f.id DESC`).bind(identity.userId).all<{ id: number }>();
+    return Response.json({ listingIds: rows.results.map((row) => row.id), listings: rows.results });
   } catch {
     return Response.json({ error: "Unable to load saved listings." }, { status: 500 });
   }
