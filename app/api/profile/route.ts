@@ -1,7 +1,10 @@
 import { eq } from "drizzle-orm";
 import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { getDb } from "@/db";
-import { locations, preferences, profiles, users } from "@/db/schema";
+import { locations, preferences, profiles, userIntents, users } from "@/db/schema";
+
+const allowedIntents = ["find_home", "find_roommate", "list_property"] as const;
+type UserIntent = typeof allowedIntents[number];
 
 type ProfilePayload = {
   firstName?: string;
@@ -14,6 +17,7 @@ type ProfilePayload = {
   roomType?: string;
   moveInDate?: string;
   lifestyle?: string[];
+  intents?: string[];
 };
 
 function clean(value: unknown, maxLength = 500) {
@@ -31,7 +35,13 @@ export async function POST(request: Request) {
     const neighborhoodSlug = clean(payload.neighborhoodSlug, 120);
     const minBudget = Math.max(0, Number(payload.minBudget) || 0);
     const maxBudget = Math.max(0, Number(payload.maxBudget) || 0);
+    const intents = [...new Set((Array.isArray(payload.intents) ? payload.intents : []).filter(
+      (intent): intent is UserIntent => allowedIntents.includes(intent as UserIntent),
+    ))];
 
+    if (!intents.length) {
+      return Response.json({ error: "Choose at least one way you want to use Debal." }, { status: 400 });
+    }
     if (!firstName || !citySlug || !neighborhoodSlug) {
       return Response.json({ error: "Name, city, and neighborhood are required." }, { status: 400 });
     }
@@ -50,6 +60,9 @@ export async function POST(request: Request) {
       target: users.id,
       set: { email: identity.email },
     });
+
+    await db.delete(userIntents).where(eq(userIntents.userId, identity.userId));
+    await db.insert(userIntents).values(intents.map((intent) => ({ userId: identity.userId, intent })));
 
     await db.insert(profiles).values({
       userId: identity.userId,

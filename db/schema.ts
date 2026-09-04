@@ -13,6 +13,31 @@ export const users = sqliteTable("users", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [uniqueIndex("idx_users_email").on(table.email), uniqueIndex("idx_users_phone").on(table.phone)]);
 
+export const userIntents = sqliteTable("user_intents", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  intent: text("intent", { enum: ["find_home", "find_roommate", "list_property"] }).notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  uniqueIndex("idx_user_intents_user_intent").on(table.userId, table.intent),
+  index("idx_user_intents_intent").on(table.intent),
+]);
+
+export const devAccounts = sqliteTable("dev_accounts", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  displayName: text("display_name").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  passwordSalt: text("password_salt").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const devSessions = sqliteTable("dev_sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: text("expires_at").notNull(),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [index("idx_dev_sessions_user").on(table.userId), index("idx_dev_sessions_expires").on(table.expiresAt)]);
+
 export const phoneVerificationChallenges = sqliteTable("phone_verification_challenges", {
   userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
   phone: text("phone").notNull(),

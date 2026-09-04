@@ -15,7 +15,7 @@ export default function Home() {
       <header className="site-header shell">
         <a className="brand" href="#top" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></a>
         <nav aria-label="Main navigation"><Link href="/listings">Find a home</Link><Link href="/roommates">Find a roommate</Link><a href="#safety">How it works</a></nav>
-        <div className="header-actions"><NotificationLink /><Link className="button button-ghost" href="/onboarding">My profile</Link><Link className="button button-dark" href="/listings/new">List a place</Link></div>
+        <div className="header-actions"><NotificationLink /><Link className="button button-ghost" href="/register">Join Debal</Link><Link className="button button-dark" href="/listings/new">List a place</Link></div>
       </header>
 
       <section className="hero shell" id="top">

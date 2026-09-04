@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { env } from "cloudflare:workers";
+import { localDevAuthEnabled, localDevUser } from "@/lib/local-dev-auth";
 
 export type ChatGPTUser = {
   userId: string;
@@ -23,7 +24,18 @@ export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
   const requestHeaders = await headers();
   const userId = requestHeaders.get(USER_ID_HEADER);
   const email = requestHeaders.get(USER_EMAIL_HEADER);
-  if (!userId || !email) return null;
+  if (!userId || !email) {
+    const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+    if (!localDevAuthEnabled(host)) return null;
+    const localUser = await localDevUser(requestHeaders.get("cookie"));
+    if (!localUser) return null;
+    return {
+      userId: localUser.userId,
+      displayName: localUser.displayName,
+      email: localUser.email,
+      fullName: localUser.displayName,
+    };
+  }
 
   const account = await env.DB.prepare("SELECT status FROM users WHERE id=?")
     .bind(userId)
