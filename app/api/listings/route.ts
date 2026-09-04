@@ -40,7 +40,8 @@ export async function GET(request: Request) {
   if (utilities) clauses.push("l.utilities_included = 1");
   if (verified) clauses.push("l.verification_status = 'verified'");
   if (/^\d{4}-\d{2}-\d{2}$/.test(availableBy)) { clauses.push("l.available_from <= ?"); values.push(availableBy); }
-  const orderBy: Record<string, string> = { price_low: "l.monthly_rent ASC, l.created_at DESC", price_high: "l.monthly_rent DESC, l.created_at DESC", available: "l.available_from ASC, l.created_at DESC", newest: "l.created_at DESC" };
+  const orderBy: Record<string, string> = { featured: "CASE l.verification_status WHEN 'verified' THEN 0 ELSE 1 END, l.created_at DESC", price_low: "l.monthly_rent ASC, l.created_at DESC", price_high: "l.monthly_rent DESC, l.created_at DESC", available: "l.available_from ASC, l.created_at DESC", newest: "l.created_at DESC" };
+  const limit = sort === "featured" ? 3 : 60;
 
   const query = env.DB.prepare(`SELECT l.id, l.title, l.description, l.monthly_rent AS monthlyRent,
     l.deposit, l.room_type AS roomType, l.bedrooms, l.bathrooms, l.furnished,
@@ -52,7 +53,7 @@ export async function GET(request: Request) {
     JOIN locations city ON city.id = l.city_id
     LEFT JOIN locations neighborhood ON neighborhood.id = l.neighborhood_id
     WHERE ${clauses.join(" AND ")}
-    ORDER BY ${orderBy[sort] ?? orderBy.newest} LIMIT 60`).bind(...values);
+    ORDER BY ${orderBy[sort] ?? orderBy.newest} LIMIT ${limit}`).bind(...values);
   const result = await query.all();
   return Response.json({ listings: result.results });
 }

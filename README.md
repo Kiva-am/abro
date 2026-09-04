@@ -44,7 +44,7 @@ Database changes live in `db/schema.ts` and must be accompanied by an ordered SQ
 
 1. Add integration tests for authenticated APIs and database state transitions.
 2. Add pagination to listings, conversations, applications, and moderation queues.
-3. Replace homepage samples with live personalized listings.
+3. Personalize homepage inventory using saved searches and profile preferences.
 4. Add reviews, audit logs, and administrator provisioning tools.
 5. Add observability, abuse monitoring, and production rate-limit controls.
 

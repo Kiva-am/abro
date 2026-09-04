@@ -35,3 +35,9 @@ test("homepage exposes essential discovery and accessibility landmarks", async (
   assert.match(html, /name="description" content="Verified rooms, homes, and compatible roommates across Ethiopia\."/i);
   assert.match(html, /<footer>/i);
 });
+
+test("homepage loads featured inventory without rendering sample properties", async () => {
+  const html = await (await renderHome()).text();
+  assert.match(html, /Loading available homes/);
+  assert.doesNotMatch(html, /Sunlit private room|Modern room near ECA/);
+});

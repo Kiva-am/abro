@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import FeaturedListings from "@/app/components/featured-listings";
 import HomeSearch from "@/app/components/home-search";
 import NotificationLink from "@/app/components/notification-link";
 
@@ -7,12 +8,6 @@ export const metadata: Metadata = {
   title: "Debal | Find a room. Find your people.",
   description: "Verified rooms, homes, and compatible roommates across Ethiopia.",
 };
-
-const listings = [
-  { area: "Bole, Addis Ababa", title: "Sunlit private room in Bole", price: "8,500 ETB", details: "Private room · Furnished · Available now", match: "94% match", tone: "listing-photo-one" },
-  { area: "Gerji, Addis Ababa", title: "Room in a calm shared apartment", price: "6,200 ETB", details: "Private room · 2 roommates · Sep 1", match: "89% match", tone: "listing-photo-two" },
-  { area: "Kazanchis, Addis Ababa", title: "Modern room near ECA", price: "9,000 ETB", details: "Private room · Utilities included · Aug 28", match: "86% match", tone: "listing-photo-three" },
-];
 
 export default function Home() {
   return (
@@ -36,14 +31,7 @@ export default function Home() {
 
       <section className="listing-section shell" id="homes">
         <div className="section-heading"><div><span className="eyebrow">PLACES YOU MAY LIKE</span><h2>Homes that fit your life</h2></div><Link href="/listings" className="text-link">Explore all listings <span>→</span></Link></div>
-        <div className="listing-grid">
-          {listings.map((listing, index) => (
-            <article className="listing-card" key={listing.title}>
-              <div className={`listing-photo ${listing.tone}`}><span className="verified-pill">✓ Verified</span><button className="heart" aria-label={`Save ${listing.title}`}>♡</button><span className="photo-number">0{index + 1}</span></div>
-              <div className="listing-body"><span className="area">{listing.area}</span><h3>{listing.title}</h3><p>{listing.details}</p><div className="listing-meta"><strong>{listing.price}<small>/month</small></strong><span>{listing.match}</span></div></div>
-            </article>
-          ))}
-        </div>
+        <FeaturedListings />
       </section>
 
       <section className="match-section" id="roommates">
