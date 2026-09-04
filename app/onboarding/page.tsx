@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ethiopianCities } from "@/lib/ethiopian-locations";
 
 type Intent = "find_home" | "find_roommate" | "list_property";
@@ -21,10 +21,33 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [profileLoadError, setProfileLoadError] = useState("");
+  const [isExisting, setIsExisting] = useState(false);
   const [form, setForm] = useState<FormState>({
     intents: [], firstName: "", occupation: "", bio: "", citySlug: "addis-ababa", neighborhoodSlug: "addis-ababa-arada",
     minBudget: 3000, maxBudget: 10000, roomType: "private_room", moveInDate: "", lifestyle: [],
   });
+
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        const response = await fetch("/api/profile");
+        const text = await response.text();
+        const data = text ? JSON.parse(text) as { profile?: FormState | null; error?: string } : {};
+        if (response.status === 401) { window.location.assign("/register"); return; }
+        if (!response.ok) throw new Error(data.error || "Unable to load your profile.");
+        if (active && data.profile) { setForm(data.profile); setIsExisting(true); }
+      } catch (caught) {
+        if (active) setProfileLoadError(caught instanceof Error ? caught.message : "Unable to load your profile.");
+      } finally {
+        if (active) setLoadingProfile(false);
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
   const city = ethiopianCities.find((item) => item.slug === form.citySlug) ?? ethiopianCities[0];
   const neighborhoods = useMemo(() => city.neighborhoods, [city]);
   const wantsHousingPreferences = form.intents.includes("find_home") || form.intents.includes("find_roommate");
@@ -48,15 +71,23 @@ export default function OnboardingPage() {
     }
   }
 
+  if (loadingProfile) return (
+    <main className="onboarding-page"><header className="onboarding-header shell"><Link className="brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link></header><section className="saved-card profile-loading"><span className="eyebrow">YOUR PROFILE</span><h1>Loading your details…</h1><p>Debal is preparing your saved goals and preferences.</p></section></main>
+  );
+
+  if (profileLoadError) return (
+    <main className="onboarding-page"><header className="onboarding-header shell"><Link className="brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link></header><section className="saved-card"><span className="eyebrow">PROFILE UNAVAILABLE</span><h1>We couldn&apos;t load your details.</h1><p>{profileLoadError}</p><button className="button button-dark" type="button" onClick={() => window.location.reload()}>Try again</button></section></main>
+  );
+
   if (status === "saved") return (
-    <main className="onboarding-page"><header className="onboarding-header shell"><Link className="brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link></header><section className="saved-card"><span className="saved-check">✓</span><span className="eyebrow">PROFILE SAVED</span><h1>You&apos;re ready to get started.</h1><p>Your Debal profile now reflects what you want to do. You can use more than one part of the marketplace at any time.</p><div className="saved-actions">{form.intents.includes("find_home") && <Link className="button button-dark" href="/listings">Browse homes <span>→</span></Link>}{form.intents.includes("find_roommate") && <Link className="button button-dark" href="/roommates">Find roommates <span>→</span></Link>}{form.intents.includes("list_property") && <Link className="button button-dark" href="/listings/new">List your property <span>→</span></Link>}</div></section></main>
+    <main className="onboarding-page"><header className="onboarding-header shell"><Link className="brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link></header><section className="saved-card"><span className="saved-check">✓</span><span className="eyebrow">{isExisting ? "PROFILE UPDATED" : "PROFILE SAVED"}</span><h1>{isExisting ? "Your changes are saved." : "You’re ready to get started."}</h1><p>Your Debal profile now reflects what you want to do. You can use more than one part of the marketplace at any time.</p><div className="saved-actions">{form.intents.includes("find_home") && <Link className="button button-dark" href="/listings">Browse homes <span>→</span></Link>}{form.intents.includes("find_roommate") && <Link className="button button-dark" href="/roommates">Find roommates <span>→</span></Link>}{form.intents.includes("list_property") && <Link className="button button-dark" href="/listings/new">List your property <span>→</span></Link>}</div></section></main>
   );
 
   return (
     <main className="onboarding-page">
       <header className="onboarding-header shell"><Link className="brand" href="/" aria-label="Debal home"><span className="brand-logo" aria-hidden="true" /></Link><span>Your contact details stay private.</span></header>
       <div className="onboarding-layout shell">
-        <aside className="onboarding-aside"><span className="eyebrow">SET UP YOUR PROFILE</span><h1>Start with what you need.</h1><p>Choose one or more goals. Debal will shape your next steps around them, and you can change direction later.</p><ol><li className={step === 1 ? "active" : "done"}><span>{step === 1 ? "1" : "✓"}</span><div><strong>Your goals</strong><small>How you want to use Debal</small></div></li><li className={step === 2 ? "active" : step > 2 ? "done" : ""}><span>{step > 2 ? "✓" : "2"}</span><div><strong>About you</strong><small>Basic profile and location</small></div></li><li className={step === 3 ? "active" : ""}><span>3</span><div><strong>Search preferences</strong><small>For homes and roommates</small></div></li></ol></aside>
+        <aside className="onboarding-aside"><span className="eyebrow">{isExisting ? "EDIT YOUR PROFILE" : "SET UP YOUR PROFILE"}</span><h1>{isExisting ? "Keep your needs current." : "Start with what you need."}</h1><p>Choose one or more goals. Debal will shape your next steps around them, and you can change direction later.</p><ol><li className={step === 1 ? "active" : "done"}><span>{step === 1 ? "1" : "✓"}</span><div><strong>Your goals</strong><small>How you want to use Debal</small></div></li><li className={step === 2 ? "active" : step > 2 ? "done" : ""}><span>{step > 2 ? "✓" : "2"}</span><div><strong>About you</strong><small>Basic profile and location</small></div></li><li className={step === 3 ? "active" : ""}><span>3</span><div><strong>Search preferences</strong><small>For homes and roommates</small></div></li></ol></aside>
         <section className="onboarding-card">
           {step === 1 ? (
             <form onSubmit={(event) => { event.preventDefault(); if (!form.intents.length) { setMessage("Choose at least one option to continue."); return; } setMessage(""); setStep(2); }}>
@@ -72,7 +103,7 @@ export default function OnboardingPage() {
               <div className="form-grid two"><label><span>City</span><select value={form.citySlug} onChange={(e) => { const nextCity = ethiopianCities.find((item) => item.slug === e.target.value) ?? ethiopianCities[0]; setForm((current) => ({ ...current, citySlug: nextCity.slug, neighborhoodSlug: `${nextCity.slug}-${nextCity.neighborhoods[0].toLowerCase().replaceAll(" ", "-")}` })); }}>{ethiopianCities.map((item) => <option key={item.slug} value={item.slug}>{item.name}</option>)}</select></label><label><span>Neighborhood</span><select value={form.neighborhoodSlug} onChange={(e) => update("neighborhoodSlug", e.target.value)}>{neighborhoods.map((name) => <option key={name} value={`${city.slug}-${name.toLowerCase().replaceAll(" ", "-")}`}>{name}</option>)}</select></label></div>
               <label className="full-field"><span>Short introduction</span><textarea rows={4} placeholder="A little about your work, studies, property, or what makes a comfortable home for you." value={form.bio} onChange={(e) => update("bio", e.target.value)} /></label>
               {status === "error" && <p className="form-error" role="alert">{message}</p>}
-              <div className="form-actions"><button className="back-link" type="button" onClick={() => { setStatus("idle"); setMessage(""); setStep(1); }}>← Back</button><button className="button button-dark" type="submit" disabled={status === "saving"}>{status === "saving" ? "Saving..." : wantsHousingPreferences ? "Search preferences" : "Finish and save"} <span>→</span></button></div>
+              <div className="form-actions"><button className="back-link" type="button" onClick={() => { setStatus("idle"); setMessage(""); setStep(1); }}>← Back</button><button className="button button-dark" type="submit" disabled={status === "saving"}>{status === "saving" ? "Saving..." : wantsHousingPreferences ? "Search preferences" : isExisting ? "Save changes" : "Finish and save"} <span>→</span></button></div>
             </form>
           ) : (
             <form onSubmit={(event) => { event.preventDefault(); void saveProfile(); }}>
@@ -82,7 +113,7 @@ export default function OnboardingPage() {
               <fieldset className="choice-group"><legend>Lifestyle</legend><div className="choice-grid">{[["non-smoker","Non-smoker"],["pet-friendly","Pet friendly"],["quiet-home","Quiet home"],["early-sleeper","Early sleeper"],["guests-okay","Guests okay"],["very-tidy","Very tidy"]].map(([value,label]) => <label key={value}><input type="checkbox" checked={form.lifestyle.includes(value)} onChange={() => toggleLifestyle(value)} /><span>{label}</span></label>)}</div></fieldset>
               <div className="privacy-box"><strong>What others will see</strong><p>Your name, introduction, general location, and relevant lifestyle preferences. Phone numbers and identity documents are never displayed publicly.</p></div>
               {status === "error" && <p className="form-error" role="alert">{message}</p>}
-              <div className="form-actions"><button className="back-link" type="button" onClick={() => { setStatus("idle"); setMessage(""); setStep(2); }}>← Back</button><button className="button button-dark" type="submit" disabled={status === "saving"}>{status === "saving" ? "Saving..." : "Finish and save"} <span>→</span></button></div>
+              <div className="form-actions"><button className="back-link" type="button" onClick={() => { setStatus("idle"); setMessage(""); setStep(2); }}>← Back</button><button className="button button-dark" type="submit" disabled={status === "saving"}>{status === "saving" ? "Saving..." : isExisting ? "Save changes" : "Finish and save"} <span>→</span></button></div>
             </form>
           )}
         </section>

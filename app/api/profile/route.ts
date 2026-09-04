@@ -1,3 +1,4 @@
+import { env } from "cloudflare:workers";
 import { eq } from "drizzle-orm";
 import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { getDb } from "@/db";
@@ -22,6 +23,59 @@ type ProfilePayload = {
 
 function clean(value: unknown, maxLength = 500) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+type StoredProfile = {
+  firstName: string; occupation: string | null; bio: string; citySlug: string | null; neighborhoodSlug: string | null;
+  minBudget: number | null; maxBudget: number | null; roomType: string | null; moveInDate: string | null;
+  smoking: string | null; pets: string | null; cleanliness: number | null; sleepSchedule: string | null; socialPreference: string | null;
+};
+
+export async function GET() {
+  const identity = await getChatGPTUser();
+  if (!identity) return Response.json({ error: "Sign in is required to view a profile." }, { status: 401 });
+
+  try {
+    const [profile, intentResult] = await Promise.all([
+      env.DB.prepare(`SELECT p.first_name AS firstName,p.occupation,p.bio,city.slug AS citySlug,
+        neighborhood.slug AS neighborhoodSlug,pr.min_budget AS minBudget,pr.max_budget AS maxBudget,
+        pr.room_type AS roomType,pr.move_in_date AS moveInDate,pr.smoking,pr.pets,pr.cleanliness,
+        pr.sleep_schedule AS sleepSchedule,pr.social_preference AS socialPreference
+        FROM profiles p
+        LEFT JOIN locations city ON city.id=p.city_id
+        LEFT JOIN locations neighborhood ON neighborhood.id=p.neighborhood_id
+        LEFT JOIN preferences pr ON pr.user_id=p.user_id
+        WHERE p.user_id=?`).bind(identity.userId).first<StoredProfile>(),
+      env.DB.prepare("SELECT intent FROM user_intents WHERE user_id=? ORDER BY id").bind(identity.userId).all<{ intent: UserIntent }>(),
+    ]);
+    if (!profile) return Response.json({ profile: null });
+
+    const lifestyle: string[] = [];
+    if (profile.smoking === "non-smoker") lifestyle.push("non-smoker");
+    if (profile.pets === "friendly") lifestyle.push("pet-friendly");
+    if (profile.socialPreference === "quiet") lifestyle.push("quiet-home");
+    if (profile.sleepSchedule === "early") lifestyle.push("early-sleeper");
+    if (profile.socialPreference === "social") lifestyle.push("guests-okay");
+    if (profile.cleanliness === 5) lifestyle.push("very-tidy");
+
+    return Response.json({
+      profile: {
+        intents: intentResult.results.map((item) => item.intent),
+        firstName: profile.firstName,
+        occupation: profile.occupation ?? "",
+        bio: profile.bio,
+        citySlug: profile.citySlug ?? "addis-ababa",
+        neighborhoodSlug: profile.neighborhoodSlug ?? "addis-ababa-arada",
+        minBudget: profile.minBudget ?? 0,
+        maxBudget: profile.maxBudget ?? 0,
+        roomType: profile.roomType ?? "private_room",
+        moveInDate: profile.moveInDate ?? "",
+        lifestyle,
+      },
+    });
+  } catch {
+    return Response.json({ error: "Unable to load your profile right now." }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
