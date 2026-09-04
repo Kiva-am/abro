@@ -27,6 +27,10 @@ export async function GET(request: Request) {
   const verified = url.searchParams.get("verified") === "1";
   const availableBy = clean(url.searchParams.get("availableBy"), 20);
   const sort = clean(url.searchParams.get("sort"), 30);
+  const requestedPage = Number(url.searchParams.get("page"));
+  const page = Number.isInteger(requestedPage) && requestedPage > 0 ? Math.min(requestedPage, 500) : 1;
+  const pageSize = sort === "featured" ? 3 : 12;
+  const offset = (page - 1) * pageSize;
   const clauses = ["l.status = 'active'"];
   const values: Array<string | number> = [];
   if (keyword) { clauses.push("(l.title LIKE ? OR l.description LIKE ? OR city.name LIKE ? OR neighborhood.name LIKE ?)"); const pattern = `%${keyword}%`; values.push(pattern, pattern, pattern, pattern); }
@@ -40,8 +44,13 @@ export async function GET(request: Request) {
   if (utilities) clauses.push("l.utilities_included = 1");
   if (verified) clauses.push("l.verification_status = 'verified'");
   if (/^\d{4}-\d{2}-\d{2}$/.test(availableBy)) { clauses.push("l.available_from <= ?"); values.push(availableBy); }
-  const orderBy: Record<string, string> = { featured: "CASE l.verification_status WHEN 'verified' THEN 0 ELSE 1 END, l.created_at DESC", price_low: "l.monthly_rent ASC, l.created_at DESC", price_high: "l.monthly_rent DESC, l.created_at DESC", available: "l.available_from ASC, l.created_at DESC", newest: "l.created_at DESC" };
-  const limit = sort === "featured" ? 3 : 60;
+  const orderBy: Record<string, string> = {
+    featured: "CASE l.verification_status WHEN 'verified' THEN 0 ELSE 1 END, l.created_at DESC, l.id DESC",
+    price_low: "l.monthly_rent ASC, l.created_at DESC, l.id DESC",
+    price_high: "l.monthly_rent DESC, l.created_at DESC, l.id DESC",
+    available: "l.available_from ASC, l.created_at DESC, l.id DESC",
+    newest: "l.created_at DESC, l.id DESC",
+  };
 
   const query = env.DB.prepare(`SELECT l.id, l.title, l.description, l.monthly_rent AS monthlyRent,
     l.deposit, l.room_type AS roomType, l.bedrooms, l.bathrooms, l.furnished,
@@ -53,9 +62,17 @@ export async function GET(request: Request) {
     JOIN locations city ON city.id = l.city_id
     LEFT JOIN locations neighborhood ON neighborhood.id = l.neighborhood_id
     WHERE ${clauses.join(" AND ")}
-    ORDER BY ${orderBy[sort] ?? orderBy.newest} LIMIT ${limit}`).bind(...values);
+    ORDER BY ${orderBy[sort] ?? orderBy.newest}
+    LIMIT ? OFFSET ?`).bind(...values, pageSize + 1, offset);
   const result = await query.all();
-  return Response.json({ listings: result.results });
+  const hasMore = result.results.length > pageSize;
+  return Response.json({
+    listings: result.results.slice(0, pageSize),
+    page,
+    pageSize,
+    hasMore,
+    nextPage: hasMore ? page + 1 : null,
+  });
 }
 
 export async function POST(request: Request) {
