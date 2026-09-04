@@ -5,6 +5,7 @@ Abro is the repository for **Debal**, a verified Ethiopian housing and roommate 
 ## Current product slice
 
 - Responsive discovery homepage and searchable Ethiopian property marketplace
+- Multi-purpose onboarding for renters, roommate seekers, and property listers
 - Owner listing management with R2 photo uploads
 - Profiles, saved listings, and explained roommate compatibility scores
 - Private messaging, viewing requests, rental applications, and rental offers
@@ -21,6 +22,8 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+In local development, `/register` offers email-and-password test accounts so protected workflows can be exercised without an SMS provider. This fallback only accepts localhost requests while the app is running in development mode; production continues to require ChatGPT authentication and Ethiopian phone verification.
 
 The local runtime expects the `DB` D1 binding and `MEDIA` R2 binding configured in `.openai/hosting.json`. Phone verification additionally requires these runtime secrets:
 
@@ -43,7 +46,7 @@ Database changes live in `db/schema.ts` and must be accompanied by an ordered SQ
 ## MVP roadmap
 
 1. Add integration tests for authenticated APIs and database state transitions.
-2. Add pagination to listings, conversations, applications, and moderation queues.
+2. Add pagination to conversations, applications, and moderation queues.
 3. Personalize homepage inventory using saved searches and profile preferences.
 4. Add reviews, audit logs, and administrator provisioning tools.
 5. Add observability, abuse monitoring, and production rate-limit controls.
